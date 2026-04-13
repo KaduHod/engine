@@ -6,11 +6,12 @@
       <table class="min-w-full border-collapse border border-gray-300">
         <thead>
           <tr class="bg-gray-100">
-            <% entidade.colunas.forEach(coluna => { %>
+            <% entidade.colunas.filter(c => !c.hidden).forEach(coluna => { %>
               <th class="border border-gray-300 px-4 py-2 text-left text-sm font-medium">
                 <%= coluna.nome %>
                 <% if (coluna.pk) { %>(PK)<% } %>
                 <% if (coluna.fk) { %>(FK)<% } %>
+
               </th>
             <% }) %>
             <th class="border border-gray-300 px-4 py-2 text-left text-sm font-medium">Ações</th>
@@ -20,16 +21,24 @@
           <% if (itens && itens.length > 0) { %>
             <% itens.forEach((item, index) => { %>
               <tr class="hover:bg-gray-50" data-index="<%= index %>">
-                <% entidade.colunas.forEach(coluna => { %>
+                  <% entidade.colunas.filter(c => c.hidden).forEach(coluna => { %>
+                        <input type="hidden" name="<%= coluna.nome %>" value="<%= item[coluna.nome] || '' %>">
+                   <% }) %>
+                  <% entidade.colunas.filter(c => !c.hidden).forEach(coluna => { %>
                   <td class="border border-gray-300 px-4 py-2">
                     <%
                       let inputType = 'text';
                       let inputClass = 'w-full p-2 border rounded min-h-[44px]';
+                    if(coluna.hidden) {
+                        inputType = 'hidden';
+                        inputClass = 'hidden';
+                    } else {
                       if (coluna.tipo === 'number') inputType = 'number';
                       if (coluna.tipo === 'boolean') {
                         inputType = 'checkbox';
                         inputClass = 'h-5 w-5 mx-auto block';
                       }
+                    }
                     %>
                     <% if (coluna.pk) { %>
                       <input type="<%= inputType %>" class="<%= inputClass %> bg-gray-100" name="<%= coluna.nome %>[]" value="<%= item[coluna.nome] || '' %>" readonly>
@@ -57,11 +66,22 @@
       <% if (itens && itens.length > 0) { %>
         <% itens.forEach((item, index) => { %>
           <div class="border border-gray-300 rounded-lg p-4 mb-3 bg-white shadow-sm" data-index="<%= index %>">
-            <% entidade.colunas.forEach(coluna => { %>
+
+            <% entidade.colunas.filter(c => c.hidden).forEach(coluna => { %>
+                <input type="hidden" name="<%= coluna.nome %>" value="<%= item[coluna.nome] || '' %>">
+            <% }) %>
+            <% entidade.colunas.filter(c => !c.hidden).forEach(coluna => { %>
               <%
-                let inputType = 'text';
-                if (coluna.tipo === 'number') inputType = 'number';
-                if (coluna.tipo === 'boolean') inputType = 'checkbox';
+                      let inputType = 'text';
+                    if(coluna.hidden) {
+                        inputType = 'hidden';
+                        inputClass = 'hidden';
+                    } else {
+                      if (coluna.tipo === 'number') inputType = 'number';
+                      if (coluna.tipo === 'boolean') {
+                        inputType = 'checkbox';
+                      }
+                    }
               %>
               <div class="mb-3">
                 <label class="block text-xs font-medium text-gray-500 mb-1">

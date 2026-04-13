@@ -21,8 +21,25 @@ app.get('/', (req, res) => {
         entidades: EntidadesGym
     });
 })
-app.get('/treino', (req, res) => {
-    const entidade = EntidadesGym.treino;
+app.get('/pessoa', (req, res) => {
+    const entidade = EntidadesGym.pessoa;
+    const itens = [
+        {
+            nome: "carlos",
+
+        },
+        {
+            nome: "Natasha",
+        }
+    ];
+    res.render('motor/form', {
+        entidade,
+        itens: itens,
+        entidades: EntidadesGym
+    });
+})
+app.get('/exercicio_treino', (req, res) => {
+    const entidade = EntidadesGym.exercicio_treino;
 
     // Dados de exemplo para a lista (pode ser array vazio inicialmente)
     const itens = [
@@ -42,10 +59,9 @@ app.get('/treino', (req, res) => {
         }
     ];
 
-    res.render('pages/treinos', {
+    res.render('motor/form', {
         entidade,
         itens,
-        titulo: "Treinos",
         entidades: EntidadesGym
     });
 })

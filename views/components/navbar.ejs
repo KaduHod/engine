@@ -20,7 +20,7 @@
         <a href="/" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm">Home</a>
         <% if (entidades) { %>
           <% Object.values(entidades).forEach(entidade => { %>
-              <a hx-target="main" hx-swap="innerHTML" hx-get="/<%= entidade.nome %>" class="cursor-pointer block text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm"><%= entidade.nome %></a>
+              <a hx-target="main" hx-swap="innerHTML" hx-get="/<%= entidade.http_path_name %>" class="cursor-pointer block text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm"><%= entidade.nome %></a>
           <% }) %>
         <% } %>
       </div>
@@ -33,7 +33,7 @@
     <a href="/" class="block text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm">Home</a>
     <% if (entidades) { %>
       <% Object.values(entidades).forEach(entidade => { %>
-          <a hx-target="main" hx-swap="innerHTML" hx-get="/<%= entidade.nome %>" class="cursor-pointer block text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm"><%= entidade.nome %></a>
+          <a hx-target="main" hx-swap="innerHTML" hx-get="/<%= entidade.http_path_name %>" class="cursor-pointer block text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm"><%= entidade.nome %></a>
       <% }) %>
     <% } %>
   </div>
