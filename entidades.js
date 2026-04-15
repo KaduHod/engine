@@ -8,6 +8,7 @@
  * @typedef {Object} Coluna
  * @property {string} nome
  * @property {TipoColuna} tipo
+ * @property {string} [label=null]
  * @property {boolean} [pk=false]
  * @property {boolean} [hidden=false]
  * @property {boolean|string} [fk=false]
@@ -25,7 +26,7 @@
 /** @type {Entidade} */
 const exercicio_treino = {
     nome: "Exercicio Treino",
-    http_path_name: "exercicio_treino",
+    http_path_name: "treino",
     tabela: "treino_exercise",
     tipo: "lista",
     colunas: [
@@ -43,14 +44,17 @@ const exercicio_treino = {
         },
         {
             nome: "series",
+            label: "Séries",
             tipo: "number",
         },
         {
-            nome: "repetições",
-            tipo: "number",
+            nome: "repeticoes",
+            label: "Repetições",
+            tipo: "string",
         },
         {
-            nome: "descanso",
+            label: "Descanso",
+            nome: "descanso_sec",
             tipo: "number",
         }
     ]

@@ -4,7 +4,11 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import morgan from "morgan";
+import { loadEnvFile } from "process";
+import treino_router from "./modulos/treino/treino.js";
+import pool from "./database/conn.js";
 
+loadEnvFile()
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
@@ -15,57 +19,22 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "../public")));
 
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
     res.render('pages/home', {
         titulo: "Home",
         entidades: EntidadesGym
     });
 })
-app.get('/pessoa', (req, res) => {
+app.get('/pessoa', async (req, res) => {
     const entidade = EntidadesGym.pessoa;
-    const itens = [
-        {
-            nome: "carlos",
-
-        },
-        {
-            nome: "Natasha",
-        }
-    ];
+    const [itens] = await pool.promise().query("SELECT * FROM pessoa");
     res.render('motor/form', {
         entidade,
         itens: itens,
         entidades: EntidadesGym
     });
 })
-app.get('/exercicio_treino', (req, res) => {
-    const entidade = EntidadesGym.exercicio_treino;
-
-    // Dados de exemplo para a lista (pode ser array vazio inicialmente)
-    const itens = [
-        {
-            treino: 1,
-            exercicio: 101,
-            series: 3,
-            "repetições": 10,
-            descanso: 60
-        },
-        {
-            treino: 2,
-            exercicio: 102,
-            series: 4,
-            "repetições": 12,
-            descanso: 45
-        }
-    ];
-
-    res.render('motor/form', {
-        entidade,
-        itens,
-        entidades: EntidadesGym
-    });
-})
-
+app.use("/treino", treino_router)
 try {
     app.listen(PORT, () => {
         console.log(`Aplicacao rodando :${PORT}`)
@@ -74,4 +43,7 @@ try {
     console.error(error)
 }
 
-
+process.on('SIGINT', async () => {
+    await mysql.end();
+    process.exit(0);
+});

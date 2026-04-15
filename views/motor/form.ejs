@@ -8,7 +8,7 @@
           <tr class="bg-gray-100">
             <% entidade.colunas.filter(c => !c.hidden).forEach(coluna => { %>
               <th class="border border-gray-300 px-4 py-2 text-left text-sm font-medium">
-                <%= coluna.nome %>
+                <%= coluna.label ?? coluna.nome %>
                 <% if (coluna.pk) { %>(PK)<% } %>
                 <% if (coluna.fk) { %>(FK)<% } %>
 
@@ -85,18 +85,18 @@
               %>
               <div class="mb-3">
                 <label class="block text-xs font-medium text-gray-500 mb-1">
-                  <%= coluna.nome %>
+                  <%= coluna.label ?? coluna.nome %>
                   <% if (coluna.pk) { %><span class="text-blue-500">(PK)</span><% } %>
                   <% if (coluna.fk) { %><span class="text-purple-500">(FK)</span><% } %>
                 </label>
                 <% if (inputType === 'checkbox') { %>
-                  <input type="checkbox" class="h-5 w-5" name="<%= coluna.nome %>[]" <%= item[coluna.nome] ? 'checked' : '' %> <% if (coluna.pk) { %>readonly<% } %>>
+                  <input type="checkbox" class="h-5 w-5" name="<%= coluna.nome %>[]" <%= item[ coluna.label ?? coluna.nome] ? 'checked' : '' %> <% if (coluna.pk) { %>readonly<% } %>>
                 <% } else { %>
                   <input
                     type="<%= inputType %>"
                     class="w-full p-2 border rounded min-h-[44px] text-sm <%= coluna.pk ? 'bg-gray-100' : '' %>"
                     name="<%= coluna.nome %>[]"
-                    value="<%= item[coluna.nome] || '' %>"
+                    value="<%= item[coluna.label ?? coluna.nome] || '' %>"
                     <% if (coluna.pk) { %>readonly<% } %>
                   >
                 <% } %>
