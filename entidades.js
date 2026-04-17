@@ -23,6 +23,15 @@
  * @property {Coluna[]} colunas
  */
 
+
+/** @type {Coluna}*/
+const DEFAULT_ID = {
+    nome:"id",
+    label:"ID",
+    tipo:"number",
+    pk: true
+}
+
 /** @type {Entidade} */
 const exercicio_treino = {
     nome: "Exercicio Treino",
@@ -30,12 +39,12 @@ const exercicio_treino = {
     tabela: "treino_exercise",
     tipo: "lista",
     colunas: [
+        DEFAULT_ID,
         {
             nome: "treino",
             tipo: "number",
             hidden: true,
-            pk: true,
-            fk: false,
+            fk: true,
         },
         {
             nome: "exercicio",
@@ -67,12 +76,7 @@ const treino = {
     http_path_name: "treino",
     tipo: "lista",
     colunas: [
-        {
-            nome:"id",
-            label:"ID",
-            tipo:"number",
-            pk: true
-        },
+        DEFAULT_ID,
         {
             nome:"nome",
             label:"Nome",
@@ -87,6 +91,7 @@ const pessoa = {
     http_path_name: "pessoa",
     tipo: "lista",
     colunas: [
+        DEFAULT_ID,
         {
             nome:"nome",
             label:"Nome",
