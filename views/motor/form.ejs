@@ -17,7 +17,7 @@
         <tbody id="itens-container-desktop">
           <% if (itens && itens.length > 0) { %>
               <% itens.forEach((item, index) => { %>
-              <tr data-desktop-item="true" class="hover:bg-gray-50" data-index="<%= index %>">
+              <tr data-desktop-item="true" class="hover:bg-gray-50" data-id="<%= index %>">
                   <% entidade.colunas.filter(c => c.hidden).forEach(coluna => { %>
                         <input type="hidden" name="<%= coluna.nome %>" value="<%= item[coluna.nome] || '' %>">
                    <% }) %>
@@ -58,7 +58,8 @@
                   </td>
                 <% }) %>
                 <td class="border border-gray-300 px-4 py-2">
-                  <button type="button" class="remover-item text-red-500 text-sm hover:underline" data-index="<%= index %>">Remover</button>
+                    <input data-remove-item="true" type="checkbox" class="cursor-pointer h-5 w-5 border-gray-400 bg-white">
+                    <input type="hidden" name="excluir" data-remove-input="true" value="false">
                 </td>
               </tr>
             <% }) %>
@@ -71,7 +72,7 @@
     <div class="md:hidden" id="itens-container-mobile">
       <% if (itens && itens.length > 0) { %>
         <% itens.forEach((item, index) => { %>
-          <div data-mobile-item="true" class="border border-gray-300 rounded-lg p-4 mb-3 bg-white shadow-sm" data-index="<%= index %>">
+          <div data-mobile-item="true" class="border border-gray-300 rounded-lg p-4 mb-3 bg-white shadow-sm" data-id="<%= index %>">
 
             <% entidade.colunas.filter(c => c.hidden).forEach(coluna => { %>
                 <input type="hidden" name="<%= coluna.nome %>" value="<%= item[coluna.nome] || '' %>">
@@ -116,9 +117,10 @@
                   <% } %>
               </div>
               <% }}) %>
-            <button type="button" class="remover-item w-full mt-2 text-red-500 text-sm border border-red-200 rounded py-2 hover:bg-red-50">
-              Remover item
-            </button>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Excluir</label>
+              <input type="hidden" name="excluir" data-remove-input="true" value="false">
+              <input data-remove-item="true" type="checkbox" class="cursor-pointer h-5 w-5 border-gray-400 bg-white text-apple-blue">
+
           </div>
         <% }) %>
       <% } %>
