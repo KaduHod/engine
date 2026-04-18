@@ -40,9 +40,7 @@
                       }
                     }
                     %>
-                    <% if (coluna.pk) { %>
-                      <input type="<%= inputType %>" class="<%= inputClass %> bg-gray-100" name="<%= coluna.nome %>[]" value="<%= item[coluna.nome] || '' %>" readonly>
-                    <% } else if (inputType === 'checkbox') { %>
+                    <%  if (inputType === 'checkbox') { %>
                       <div class="flex justify-center">
                         <input type="checkbox" class="<%= inputClass %>" name="<%= coluna.nome %>[]" <%= item[coluna.nome] ? 'checked' : '' %>>
                       </div>
@@ -77,6 +75,11 @@
                 <input type="hidden" name="<%= coluna.nome %>" value="<%= item[coluna.nome] || '' %>">
             <% }) %>
             <% entidade.colunas.filter(c => !c.hidden).forEach(coluna => { %>
+             <% if(coluna.pk) { %>
+                  <div hx-get="<%= entidade.http_path_name + "/" + item[coluna.nome] %>" hx-target="main" hx-swap="innerHTML" class="flex items-center h-[44px] p-2 rounded cursor-pointer">
+                      <span data-coluna-nome="<%= %>" class="text-sm"><%= item[coluna.nome] || '' %></span>
+                  </div>
+              <% } else {  %>
               <%
                       let inputType = 'text';
                     if(coluna.hidden) {
@@ -92,8 +95,6 @@
               <div class="mb-3">
                 <label class="block text-xs font-medium text-gray-500 mb-1">
                   <%= coluna.label ?? coluna.nome %>
-                  <% if (coluna.pk) { %><span class="text-blue-500">(PK)</span><% } %>
-                  <% if (coluna.fk) { %><span class="text-purple-500">(FK)</span><% } %>
                 </label>
                 <% if (inputType === 'checkbox') { %>
                   <input type="checkbox" class="h-5 w-5" name="<%= coluna.nome %>[]" <%= item[ coluna.label ?? coluna.nome] ? 'checked' : '' %> <% if (coluna.pk) { %>readonly<% } %>>
@@ -108,11 +109,10 @@
                     class="w-full p-2 border rounded min-h-[44px] text-sm <%= coluna.pk ? 'bg-gray-100' : '' %>"
                     name="<%= coluna.nome %>[]"
                     value="<%= item[coluna.label ?? coluna.nome] || '' %>"
-                    <% if (coluna.pk) { %>readonly<% } %>
                   >
-                <% } %>
+                  <% } %>
               </div>
-            <% }) %>
+              <% }}) %>
             <button type="button" class="remover-item w-full mt-2 text-red-500 text-sm border border-red-200 rounded py-2 hover:bg-red-50">
               Remover item
             </button>
