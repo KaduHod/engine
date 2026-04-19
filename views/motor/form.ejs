@@ -1,110 +1,95 @@
-<div class="container mx-auto p-4">
-  <h1 class="text-xl font-bold mb-4"><%= entidade.nome %></h1>
-  <form id="form-<%= entidade.nome %>" class="space-y-4">
-    <%# Desktop: tabela normal | Mobile: escondida, usa cards %>
-    <div class="hidden md:block overflow-x-auto">
-      <table class="min-w-full border-collapse border border-gray-300">
-        <thead>
-          <tr class="bg-gray-100">
-            <% entidade.colunas.filter(c => !c.hidden).forEach(coluna => { %>
-              <th class="border border-gray-300 px-4 py-2 text-left text-sm font-medium">
-                <%= coluna.label ?? coluna.nome %>
-              </th>
-            <% }) %>
-            <th class="border border-gray-300 px-4 py-2 text-left text-sm font-medium">Ações</th>
-          </tr>
-        </thead>
-        <tbody id="itens-container-desktop">
-          <% if (itens && itens.length > 0) { %>
-              <% itens.forEach((item, index) => { %>
-              <tr data-desktop-item="true" class="hover:bg-gray-50" data-id="<%= index %>">
-                  <% entidade.colunas.filter(c => c.hidden).forEach(coluna => { %>
-                        <input type="hidden" name="<%= coluna.nome %>" value="<%= item[coluna.nome] || '' %>">
-                   <% }) %>
-                  <% entidade.colunas.filter(c => !c.hidden).forEach(coluna => { %>
-                  <% if (coluna.pk) { %>
-                  <td hx-get="<%= entidade.http_path_name + "/" + item[coluna.nome] %>" hx-target="main" hx-swap="innerHTML" class="border cursor-pointer border-gray-300 px-4 py-2">
-                      <span data-item-pk="true"><%= item[coluna.nome] %></span>
-                  </td>
-                  <% } else {%>
-                  <td class="border border-gray-300 px-4 py-2">
-                    <%
-                      let inputType = 'text';
-                      let inputClass = 'w-full p-2 border rounded min-h-[44px]';
-                    if(coluna.hidden) {
-                        inputType = 'hidden';
-                        inputClass = 'hidden';
-                    } else {
-                      if (coluna.tipo === 'number') inputType = 'number';
-                      if (coluna.tipo === 'boolean') {
-                        inputType = 'checkbox';
-                        inputClass = 'h-5 w-5 mx-auto block';
-                      }
-                    }
-                    %>
-                    <%  if (inputType === 'checkbox') { %>
-                      <div class="flex justify-center">
-                        <input type="checkbox" class="<%= inputClass %>" name="<%= coluna.nome %>[]" <%= item[coluna.nome] ? 'checked' : '' %>>
-                      </div>
-                    <% } else if(coluna.tipo === 'label') { %>
-                    <div class="flex items-center h-[44px] p-2 rounded">
-                        <span class="text-sm" data-item-label="true"><%= item[coluna.nome] || '' %></span>
-                        <input type="hidden" name="<%= coluna.nome %>[]" value="<%= item[coluna.nome] || '' %>">
-                    </div>
-                    <% } else { %>
-                      <input type="<%= inputType %>" class="<%= inputClass %>" name="<%= coluna.nome %>[]" value="<%= item[coluna.nome] || '' %>">
-                    <% }
-                    }%>
-                  </td>
-                <% }) %>
-                <td class="border border-gray-300 px-4 py-2">
-                    <input data-remove-item="true" type="checkbox" class="cursor-pointer h-5 w-5 border-gray-400 bg-white">
-                    <input type="hidden" name="excluir" data-remove-input="true" value="false">
-                </td>
-              </tr>
-            <% }) %>
-          <% } %>
-        </tbody>
-      </table>
+<%
+  // Monta o grid-template-columns baseado nos tipos das colunas visíveis
+  const colunasVisiveis = entidade.colunas.filter(c => !c.hidden);
+  const gridCols = colunasVisiveis.map(c => {
+    if (c.pk || c.tipo === 'boolean') return 'min-content';
+    return 'minmax(min-content, 1fr)';
+  }).join(' ') + ' min-content'; // última coluna: ações
+%>
+<form id="form-<%= entidade.nome %>">
+    <h1 class="text-xl font-bold mb-4"><%= entidade.nome %></h1>
+    <div class="mb-5 flex flex-col sm:flex-row gap-3">
+        <button
+                type="button"
+                data-id="adicionar-item"
+                class="w-full sm:w-auto bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 min-h-[44px]"
+                >
+                + Adicionar Item
+        </button>
+            <button
+                    type="submit"
+                    class="w-full sm:w-auto bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600 min-h-[44px]"
+                    >
+                    Salvar Tabela
+            </button>
     </div>
+  <%# ── Header (só desktop) ── %>
+  <div class="hidden md:grid items-center bg-gray-100 border border-gray-300 px-2 py-1 gap-2"
+       style="grid-template-columns: <%= gridCols %>">
+    <% colunasVisiveis.forEach(coluna => { %>
+      <div class="px-2 py-1 text-sm font-medium whitespace-nowrap">
+        <%= coluna.label ?? coluna.nome %>
+      </div>
+    <% }) %>
+    <div class="px-2 py-1 text-sm font-medium whitespace-nowrap">Ações</div>
+  </div>
 
-    <%# Mobile: layout de cards %>
-    <div class="md:hidden" id="itens-container-mobile">
-      <% if (itens && itens.length > 0) { %>
-        <% itens.forEach((item, index) => { %>
-          <div data-mobile-item="true" class="border border-gray-300 rounded-lg p-4 mb-3 bg-white shadow-sm" data-id="<%= index %>">
+  <%# ── Container de itens ── %>
+  <div id="itens-container">
+    <% if (itens && itens.length > 0) { %>
+      <% itens.forEach((item, index) => { %>
 
-            <% entidade.colunas.filter(c => c.hidden).forEach(coluna => { %>
-                <input type="hidden" name="<%= coluna.nome %>" value="<%= item[coluna.nome] || '' %>">
-            <% }) %>
-            <% entidade.colunas.filter(c => !c.hidden).forEach(coluna => { %>
-             <% if(coluna.pk) { %>
-                  <div hx-get="<%= entidade.http_path_name + "/" + item[coluna.nome] %>" hx-target="main" hx-swap="innerHTML" class="flex items-center h-[44px] p-2 rounded cursor-pointer">
-                      <span class="text-sm" data-item-pk="true"><%= item[coluna.nome] || '' %></span>
-                  </div>
-              <% } else {  %>
+        <%# ── MOBILE: card empilhado | DESKTOP: linha em grid ── %>
+        <div data-item="true"
+             data-id="<%= index %>"
+             class="border border-gray-300 rounded-lg p-4 mb-3 bg-white shadow-sm
+                    md:rounded-none md:p-0 md:mb-0 md:shadow-none md:border-0 md:border-b
+                    md:grid md:items-center md:gap-2 md:px-2 md:hover:bg-gray-50"
+             style="grid-template-columns: <%= gridCols %>">
+
+          <%# Campos hidden %>
+          <% entidade.colunas.filter(c => c.hidden).forEach(coluna => { %>
+            <input type="hidden" name="<%= coluna.nome %>" value="<%= item[coluna.nome] || '' %>">
+          <% }) %>
+
+          <%# Campos visíveis %>
+          <% colunasVisiveis.forEach(coluna => { %>
+
+            <% if (coluna.pk) { %>
+              <%# PK: clicável, redireciona %>
+              <div hx-get="<%= entidade.http_path_name + '/' + item[coluna.nome] %>"
+                   hx-target="main"
+                   hx-swap="innerHTML"
+                   class="flex items-center h-[44px] p-2 rounded cursor-pointer">
+                <span class="text-sm" data-item-pk="true"><%= item[coluna.nome] || '' %></span>
+              </div>
+
+            <% } else { %>
               <%
-                      let inputType = 'text';
-                    if(coluna.hidden) {
-                        inputType = 'hidden';
-                        inputClass = 'hidden';
-                    } else {
-                      if (coluna.tipo === 'number') inputType = 'number';
-                      if (coluna.tipo === 'boolean') {
-                        inputType = 'checkbox';
-                      }
-                    }
+                let inputType = 'text';
+                if (coluna.tipo === 'number')  inputType = 'number';
+                if (coluna.tipo === 'boolean') inputType = 'checkbox';
               %>
-              <div class="mb-3">
-                <label class="block text-xs font-medium text-gray-500 mb-1">
+
+              <%# Wrapper: em mobile mostra label em cima, em desktop some com o label %>
+              <div class="mb-3 md:mb-0 md:py-1">
+                <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">
                   <%= coluna.label ?? coluna.nome %>
                 </label>
+
                 <% if (inputType === 'checkbox') { %>
-                  <input type="checkbox" class="h-5 w-5" name="<%= coluna.nome %>[]" <%= item[ coluna.label ?? coluna.nome] ? 'checked' : '' %> <% if (coluna.pk) { %>readonly<% } %>>
-                <% } else if(coluna.tipo === 'label') { %>
+                  <div class="flex md:justify-center">
+                    <input type="checkbox"
+                           class="h-5 w-5"
+                           name="<%= coluna.nome %>[]"
+                           <%= item[coluna.nome] ? 'checked' : '' %>>
+                  </div>
+
+                <% } else if (coluna.tipo === 'label') { %>
                   <div class="flex items-center h-[44px] p-2 rounded">
                     <span class="text-sm" data-item-label="true"><%= item[coluna.nome] || '' %></span>
                   </div>
+
                 <% } else { %>
                   <input
                     type="<%= inputType %>"
@@ -112,39 +97,43 @@
                     data-valor="<%= item[coluna.nome] %>"
                     class="w-full p-2 border rounded min-h-[44px] text-sm <%= coluna.pk ? 'bg-gray-100' : '' %>"
                     name="<%= coluna.nome %>[]"
-                    value="<%= item[coluna.nome] || '' %>"
-                  >
-                  <% } %>
+                    value="<%= item[coluna.nome] || '' %>">
+                <% } %>
               </div>
-              <% }}) %>
-              <label class="block text-xs font-medium text-gray-500 mb-1">Excluir</label>
-              <input type="hidden" name="excluir" data-remove-input="true" value="false">
-              <input data-remove-item="true" type="checkbox" class="cursor-pointer h-5 w-5 border-gray-400 bg-white text-apple-blue">
+            <% } %>
 
+          <% }) %>
+
+          <%# Ações (excluir) %>
+          <div class="md:flex md:justify-center md:py-1">
+            <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Excluir</label>
+            <input data-remove-item="true" type="checkbox" name="excluir"
+                   class="cursor-pointer h-5 w-5 border-gray-400 bg-white text-apple-blue">
           </div>
-        <% }) %>
-      <% } %>
-    </div>
 
-    <div class="flex flex-col sm:flex-row gap-3">
-      <button
-        type="button"
-        id="adicionar-item"
-        class="w-full sm:w-auto bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 min-h-[44px]"
-      >
-        + Adicionar Linha
-      </button>
-      <button
-        type="submit"
-        class="w-full sm:w-auto bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600 min-h-[44px]"
-      >
-        Salvar Tabela
-      </button>
+        </div>
+
+      <% }) %>
+    <% } %>
+  </div>
+    <div class="mb-5 flex flex-col sm:flex-row gap-3">
+        <button
+                type="button"
+                data-id="adicionar-item"
+                class="w-full sm:w-auto bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 min-h-[44px]"
+                >
+                + Adicionar Item
+        </button>
+            <button
+                    type="submit"
+                    class="w-full sm:w-auto bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600 min-h-[44px]"
+                    >
+                    Salvar Tabela
+            </button>
     </div>
-  </form>
-</div>
+</form>
 <script type="module" src="scripts/form.js"></script>
 <script type="module">
-        import loadEvents from "./scripts/form.js";
+        import loadEvents from "/scripts/form.js";
         loadEvents();
 </script>
