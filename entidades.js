@@ -13,6 +13,8 @@
  * @property {boolean} [hidden=false]
  * @property {boolean} [search=false]
  * @property {boolean|string} [fk=false]
+ * @property {boolean|string} [fk_tabela=false]
+ * @property {boolean} [filtro=false]
  */
 
 /**
@@ -98,13 +100,16 @@ const treino = {
             nome:"nome",
             label:"Nome",
             tipo:"string",
+            filtro: true
         },
         {
             nome: "pessoa",
             label: "Pessoa",
             tipo: "number",
             search: true,
-            fk: true
+            fk: true,
+            fk_tabela: "pessoa",
+            filtro: true
         }
     ]
 }

@@ -1,12 +1,13 @@
 <%
   // Monta o grid-template-columns baseado nos tipos das colunas visíveis
-  const colunasVisiveis = entidade.colunas.filter(c => !c.hidden);
+  const colunasVisiveis = entidade.colunas.filter(c => !c.hidden && c.filtro);
   const gridCols = colunasVisiveis.map(c => {
     if (c.pk || c.tipo === 'boolean') return 'min-content';
     return 'minmax(min-content, 1fr)';
   }).join(' ') + ' min-content'; // última coluna: ações
 %>
 <%# ── Filtros ── %>
+<% if(colunasVisiveis.length) { %>
 <div class="mb-5">
     <form hx-get="/<%= entidade.http_path_name %>"
           hx-target="#itens-container"
@@ -54,3 +55,4 @@
                   <button type="reset" hx-get="/<%= entidade.http_path_name %>?filtro=1" hx-target="#itens-container" hx-swap="outerHTML" class="px-4 py-2 bg-gray-100 border border-gray-300 rounded text-sm hover:bg-gray-200">Limpar</button>
     </form>
 </div>
+<% } %>
