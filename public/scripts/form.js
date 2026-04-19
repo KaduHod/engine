@@ -2,12 +2,12 @@ const FORM = () => document.getElementById('form-<%= entidade.nome %>');
 const ITENS_CONTAINER = () => document.getElementById('itens-container');
 function replaceAtributosParaNovoItem(text, id) {
     return text
-            .replaceAll(/value="[^"]*"/g, 'value=""')
-            .replace(/(<[^>]*hx-get[^>]*class="[^"]*)\bcursor-pointer\b([^"]*")/g, '$1$2')
-            .replace(/hx-get="[^"]*"/g, "")
-            .replaceAll(/data-item-pk="true">[^<]*</g, "data-item-pk='true'>Novo<")
-            .replaceAll(/data-item-label="true">[^<]*</g, ">...<")
-            .replaceAll(/data-id="[^"]*"/g, `data-id='${id}'`);
+        .replaceAll(/value="[^"]*"/g, 'value=""')
+        .replace(/(<[^>]*hx-get[^>]*class="[^"]*)\bcursor-pointer\b([^"]*")/g, '$1$2')
+        .replace(/hx-get="[^"]*"/g, "")
+        .replaceAll(/data-item-pk="true">[^<]*</g, "data-item-pk='true'>Novo<")
+        .replaceAll(/data-item-label="true">[^<]*</g, ">...<")
+        .replaceAll(/data-id="[^"]*"/g, `data-id='${id}'`);
 }
 
 function adicionar_item() {
@@ -15,8 +15,10 @@ function adicionar_item() {
     const primeiro_item = document.querySelector('div[data-item="true"]');
     if(primeiro_item.innerHTML) {
         const novo_id = "untracked_"+Math.random().toString(36).substring(2, 10);
-        ITENS_CONTAINER().innerHTML = replaceAtributosParaNovoItem(primeiro_item.outerHTML, novo_id) + ITENS_CONTAINER().innerHTML;
-        // let novo_item = ITENS_CONTAINER.querySelector(`div[data-id="${novo_id}"]`);
+        const novo_html = replaceAtributosParaNovoItem(primeiro_item.outerHTML, novo_id);
+        ITENS_CONTAINER().insertAdjacentHTML('afterbegin', novo_html);
+        const novo_item = ITENS_CONTAINER().querySelector(`div[data-id="${novo_id}"]`);
+        htmx.process(novo_item);
     }
 }
 export default function loadEvents() {
