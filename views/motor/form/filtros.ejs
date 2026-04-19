@@ -13,7 +13,7 @@
           hx-target="#itens-container"
           hx-swap="outerHTML"
           class="flex flex-wrap gap-2">
-            <input type="hidden" name="filtro" value="1">
+            <input type="hidden" name="filtro" data-no-reset value="1">
           <% colunasVisiveis.forEach(coluna => { %>
 
           <% if (coluna.tipo === 'boolean') { %>
@@ -52,7 +52,7 @@
                   <% }) %>
 
                   <button type="submit" class="px-4 py-2 bg-gray-100 border border-gray-300 rounded text-sm hover:bg-gray-200">Filtrar</button>
-                  <button type="reset" onclick="this.closest('form').reset()" hx-get="/<%= entidade.http_path_name %>?filtro=1" hx-target="#itens-container" hx-swap="outerHTML" class="px-4 py-2 bg-gray-100 border border-gray-300 rounded text-sm hover:bg-gray-200">Limpar</button>
+                  <button type="reset" onclick="reset_form(this.closest('form'))" hx-get="/<%= entidade.http_path_name %>?filtro=1" hx-target="#itens-container" hx-swap="outerHTML" class="px-4 py-2 bg-gray-100 border border-gray-300 rounded text-sm hover:bg-gray-200">Limpar</button>
     </form>
 </div>
 <% } %>
