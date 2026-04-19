@@ -3,7 +3,8 @@ const ITENS_CONTAINER = () => document.getElementById('itens-container');
 function replaceAtributosParaNovoItem(text, id) {
     return text
             .replaceAll(/value="[^"]*"/g, 'value=""')
-            .replace(/(<[^>]*hx-get[^>]*class="[^"]*)\bcursor-pointer\b([^"]*")/g, '$1$2').replaceAll(/hx-\w+="[^"]*"/g, "")
+            .replace(/(<[^>]*hx-get[^>]*class="[^"]*)\bcursor-pointer\b([^"]*")/g, '$1$2')
+            .replace(/hx-get="[^"]*"/g, "")
             .replaceAll(/data-item-pk="true">[^<]*</g, "data-item-pk='true'>Novo<")
             .replaceAll(/data-item-label="true">[^<]*</g, ">...<")
             .replaceAll(/data-id="[^"]*"/g, `data-id='${id}'`);

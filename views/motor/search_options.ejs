@@ -1,0 +1,6 @@
+<% itens.forEach(item => { %>
+  <li class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100"
+      data-value="<%= item.value %>" tabindex="0">
+    <%= item.label %>
+  </li>
+<% }); %>

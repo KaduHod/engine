@@ -2,11 +2,34 @@ import e from "express";
 import { EntidadesGym } from "../../entidades.js";
 import pool from "../../database/conn.js";
 const treino_router = e.Router();
+
+
+/** @type {import('express').RequestHandler} */
+const search = async (req, res) => {
+    console.log({body: req.body, query: req.query})
+    let argumentos = [];
+    let query = '';
+    switch (req.query.coluna) {
+        case 'pessoa':
+            query = `select p.id as value, p.nome as label from pessoa p
+            WHERE p.nome COLLATE utf8mb4_0900_ai_ci LIKE CONCAT('%', ?, '%')
+            group by p.nome, p.id
+            order by p.id`
+            argumentos = [req.body.busca]
+            break;
+        default:
+            break;
+    }
+    const [ itens ] = await pool.promise().query(query, argumentos)
+    res.render('motor/search_options', {
+        itens,
+    });
+}
 /** @type {import('express').RequestHandler} */
 const index = async (req, res) => {
     const entidade = EntidadesGym.treino;
     // Dados de exemplo para a lista (pode ser array vazio inicialmente)
-    const [ itens ] = await pool.promise().query(`SELECT t.*, p.nome as pessoa FROM treino t left join pessoa p on p.id = t.pessoa_id`)
+    const [ itens ] = await pool.promise().query(`SELECT t.*, p.id as pessoa_id, p.nome as pessoa FROM treino t left join pessoa p on p.id = t.pessoa_id`)
     res.render('motor/form', {
         entidade,
         itens,
@@ -37,6 +60,7 @@ const treino_exercicio = async (req, res) => {
 }
 
 treino_router.get("/", index);
+treino_router.post("/search", search);
 treino_router.get("/exercicio", exercicio);
 treino_router.get("/treino_exercicio", treino_exercicio);
 export default treino_router;
