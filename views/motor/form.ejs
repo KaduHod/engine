@@ -90,26 +90,26 @@
                   <div class="flex items-center h-[44px] p-2 rounded">
                     <span class="text-sm" data-item-label="true"><%= item[coluna.nome] || '' %></span>
                   </div>
-<% } else if (coluna.tipo === 'search') { %>
-  <div class="relative" data-search-field>
-    <input
-      type="text"
-      hx-post="/<%= entidade.http_path_name %>/search?coluna=<%= coluna.nome %>"
-      hx-trigger="keyup changed delay:500ms"
-      hx-target="next ul"
-      hx-params="busca"
-      hx-vals='js:{ "busca": document.activeElement.value }'
-      hx-swap="innerHTML"
-      placeholder="Digite para buscar..."
-      class="w-full p-2 border border-gray-300 rounded-md text-sm"
-      autocomplete="off"
-      value="<%= item[coluna.nome] %>"
-      data-search-input
-    >
-    <ul class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-sm mt-1 max-h-48 overflow-y-auto" data-search-dropdown></ul>
-    <input type="hidden" name="<%= coluna.nome %>_id" value="<%= item[coluna.nome + '_id'] || '' %>" data-search-hidden>
-  </div>
-<% } else { %>
+                <% } else if (coluna.tipo === 'search') { %>
+                  <div class="relative" data-search-field>
+                    <input
+                      type="text"
+                      hx-post="/<%= entidade.http_path_name %>/search?coluna=<%= coluna.nome %>"
+                      hx-trigger="keyup changed delay:500ms"
+                      hx-target="next ul"
+                      hx-params="busca"
+                      hx-vals='js:{ "busca": document.activeElement.value }'
+                      hx-swap="innerHTML"
+                      placeholder="Digite para buscar..."
+                      class="w-full p-2 border border-gray-300 rounded-md text-sm"
+                      autocomplete="off"
+                      value="<%= item[coluna.nome] %>"
+                      data-search-input
+                    >
+                    <ul class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-sm mt-1 max-h-48 overflow-y-auto" data-search-dropdown></ul>
+                    <input type="hidden" name="<%= coluna.nome %>_id" value="<%= item[coluna.nome + '_id'] || '' %>" data-search-hidden>
+                  </div>
+                <% } else { %>
                 <input
                     type="<%= inputType %>"
                     data-nome="<%= coluna.nome %>"
