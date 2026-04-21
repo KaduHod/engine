@@ -1,3 +1,4 @@
+import { ITENS_POR_PAGINA } from "./config.js";
 /**
  * @typedef {Object} FiltroSqlEntidade
  * @property {string} sql
@@ -11,7 +12,7 @@
 * @param {Record<string, string>} conf_aliases - config de aliases para tabelas em joins
 * @returns {FiltroSqlEntidade} String contendo a cláusula WHERE ou string vazia se não houver filtros.
 */
-export function gerarFiltroSqlEntidade(entidade, query, conf_aliases = {}) {
+export function gerar_filtro_sql_entidade(entidade, query, conf_aliases = {}) {
     let argumentos = []
     let where = []
     const colunas = entidade.colunas.filter(c => c.filtro).map(c => c.nome);
@@ -32,4 +33,24 @@ export function gerarFiltroSqlEntidade(entidade, query, conf_aliases = {}) {
     }
     let sql = where.join(" and ");
     return {sql, argumentos};
+}
+
+/**
+* Gera offset para paginacao
+*
+* @param {string} query
+* @param {number} pagina
+* @returns {string} query formatada para paginacao
+*/
+export function montar_paginacao(query, pagina = 1) {
+    return query + ` ORDER BY t.id ASC LIMIT ${ITENS_POR_PAGINA} OFFSET ${(pagina-1) * ITENS_POR_PAGINA}`
+}
+/**
+* Gera query para ppegar total de itens do banco
+*
+* @param {string} query
+* @returns {string} query formatada para pegar total
+*/
+export function montar_query_total(query) {
+    return query.replace(/SELECT[\s\S]*?FROM/i, 'SELECT COUNT(*) as total FROM')
 }

@@ -1,7 +1,8 @@
 import e from "express";
 import { EntidadesGym } from "../../entidades.js";
 import pool from "../../database/conn.js";
-import { gerarFiltroSqlEntidade } from "../../filtro.js";
+import { gerar_filtro_sql_entidade, montar_paginacao, montar_query_total } from "../../filtro.js";
+import { ITENS_POR_PAGINA } from "../../config.js";
 const treino_router = e.Router();
 
 /** @type {import('express').RequestHandler} */
@@ -28,25 +29,32 @@ const search = async (req, res) => {
 /** @type {import('express').RequestHandler} */
 const index = async (req, res) => {
     const entidade = EntidadesGym.treino;
+    let pagina = req.query.pagina ?? 1;
+    pagina = parseInt(pagina);
     let query = "SELECT t.*, p.id as pessoa_id, p.nome as pessoa FROM treino t left join pessoa p on p.id = t.pessoa_id where 1=1";
     let page = 'motor/form/form'
     let argumentos = []
     if(req.query.filtro) {
         page = 'motor/form/itens_container';
-        const filtro = gerarFiltroSqlEntidade(entidade, req.query, {pessoa: "p", treino: "t"})
+        const filtro = gerar_filtro_sql_entidade(entidade, req.query, {pessoa: "p", treino: "t"})
         if(filtro.sql) {
             page = 'motor/form/itens_container';
             query += ' and ' + filtro.sql;
             argumentos = filtro.argumentos;
         }
     }
-    console.log(query)
-    const [ itens ] = await pool.promise().query(query, argumentos)
+
+    const [ itens ] = await pool.promise().query(montar_paginacao(query, pagina), argumentos)
+    let query_tot =  montar_query_total(query);
+    const [ item_tot ] = await pool.promise().query(query_tot, argumentos)
 
     res.render(page, {
         layout: false,
+        total: item_tot[0].total,
+        pagina,
         entidade,
         itens,
+        itens_por_pagina: ITENS_POR_PAGINA,
         entidades: EntidadesGym
     });
 }

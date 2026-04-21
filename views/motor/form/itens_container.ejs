@@ -106,4 +106,38 @@
 
       <% }) %>
     <% } %>
+<%# ── Paginação ── %>
+<% if (typeof pagina !== 'undefined' && typeof total !== 'undefined') { %>
+  <%
+    const totalPaginas = Math.ceil(total / itens_por_pagina);
+  %>
+  <div class="mt-4 flex items-center gap-2">
+    <button
+      type="button"
+      hx-get="/<%= entidade.http_path_name %>?pagina=<%= pagina - 1 %>"
+      hx-target="main"
+      hx-swap="innerHTML"
+      <%= pagina <= 1 ? 'disabled' : '' %>
+      class="px-4 py-2 rounded text-sm min-h-[44px] <%= pagina <= 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-300' %>"
+    >
+      ←
+    </button>
+
+    <span class="text-sm text-gray-600 px-2">
+        <%= pagina %> de <%= totalPaginas %>
+    </span>
+
+    <button
+      type="button"
+      hx-get="/<%= entidade.http_path_name %>?pagina=<%= pagina + 1 %>"
+      hx-target="main"
+      hx-swap="innerHTML"
+      <%= pagina >= totalPaginas ? 'disabled' : '' %>
+      class="px-4 py-2 rounded text-sm min-h-[44px] <%= pagina >= totalPaginas ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-300' %>"
+    >
+        →
+    </button>
   </div>
+<% } %>
+  </div>
+
