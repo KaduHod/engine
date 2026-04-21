@@ -4,6 +4,9 @@
     if (c.pk || c.tipo === 'boolean') return 'min-content';
     return 'minmax(min-content, 1fr)';
   }).join(' ') + ' min-content';
+  let itens_por_pagina_ = (typeof itens_por_pagina !== 'undefined') ? itens_por_pagina : null;
+  let total_ = (typeof total !== 'undefined') ? total : null;
+  let pagina_ = (typeof pagina !== 'undefined') ? pagina : null;
 %>
 <h1 class="text-xl font-bold mb-4"><%= entidade.nome %></h1>
 <%- include('filtros', { entidade, itens }) %>
@@ -35,7 +38,7 @@
     <div class="px-2 py-1 text-sm font-medium whitespace-nowrap">Ações</div>
   </div>
 
-  <%- include('itens_container', { entidade, itens, itens_por_pagina, pagina, total }) %>
+  <%- include('itens_container', { entidade, itens, itens_por_pagina: itens_por_pagina_, total: total_, pagina: pagina_ }) %>
 
     <div class="mt-5 flex flex-col sm:flex-row gap-3">
         <button

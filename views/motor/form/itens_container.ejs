@@ -107,7 +107,7 @@
       <% }) %>
     <% } %>
 <%# ── Paginação ── %>
-<% if (typeof pagina !== 'undefined' && typeof total !== 'undefined') { %>
+<% if (typeof pagina !== 'undefined' && typeof total !== 'undefined' && pagina) { %>
   <%
     const totalPaginas = Math.ceil(total / itens_por_pagina);
   %>
