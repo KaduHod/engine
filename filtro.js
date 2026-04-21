@@ -42,8 +42,8 @@ export function gerar_filtro_sql_entidade(entidade, query, conf_aliases = {}) {
 * @param {number} pagina
 * @returns {string} query formatada para paginacao
 */
-export function montar_paginacao(query, pagina = 1) {
-    return query + ` ORDER BY t.id ASC LIMIT ${ITENS_POR_PAGINA} OFFSET ${(pagina-1) * ITENS_POR_PAGINA}`
+export function montar_paginacao(query, pagina = 1, id_alias = "") {
+    return query + ` ORDER BY ${id_alias}id ASC LIMIT ${ITENS_POR_PAGINA} OFFSET ${(pagina-1) * ITENS_POR_PAGINA}`
 }
 /**
 * Gera query para ppegar total de itens do banco

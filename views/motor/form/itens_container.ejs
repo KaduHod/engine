@@ -37,6 +37,7 @@
                 <span class="text-sm" data-item-pk="true"><%= item[coluna.nome] || '' %></span>
               </div>
 
+                <input type="hidden" name="<%= coluna.nome %>[]" value="<%= item[coluna.nome] || '' %>">
             <% } else { %>
               <%
                 let inputType = 'text';

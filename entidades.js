@@ -129,6 +129,7 @@ const pessoa = {
             nome:"nome",
             label:"Nome",
             tipo:"string",
+            filtro: true
         }
     ]
 }

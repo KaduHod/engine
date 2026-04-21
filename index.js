@@ -8,6 +8,8 @@ import { loadEnvFile } from "process";
 import treino_router from "./modulos/treino/treino.js";
 import pool from "./database/conn.js";
 import ejsLayout from "express-ejs-layouts";
+import { gerar_filtro_sql_entidade, montar_paginacao, montar_query_total } from "./filtro.js";
+import { ITENS_POR_PAGINA } from "./config.js";
 
 loadEnvFile()
 const __filename = fileURLToPath(import.meta.url);
@@ -28,14 +30,36 @@ app.get('/', async (req, res) => {
         entidades: EntidadesGym
     });
 })
+app.post('/pessoa', async (req, res) => {
+    console.log(req.body)
+})
 app.get('/pessoa', async (req, res) => {
     const entidade = EntidadesGym.pessoa;
-    const [itens] = await pool.promise().query("SELECT * FROM pessoa");
+    let pagina = req.query.pagina ?? 1;
+    pagina = parseInt(pagina);
+    let query = "SELECT * FROM pessoa p where 1=1";
+    let argumentos = []
+    if(req.query.filtro) {
+        const filtro = gerar_filtro_sql_entidade(entidade, req.query, {pessoa: "p"})
+        if(filtro.sql) {
+            query += ' and ' + filtro.sql;
+        }
+        if(filtro.argumentos) {
+            argumentos = filtro.argumentos
+        }
+    }
+    const [itens, itens_tot] = await Promise.all([
+        pool.promise().query(montar_paginacao(query, pagina), argumentos),
+        pool.promise().query(montar_query_total(query), argumentos)
+    ]).then((results) => [results[0][0], results[1][0]]);
     res.render('motor/form/form', {
         entidade,
         layout: false,
         itens: itens,
-        entidades: EntidadesGym
+        entidades: EntidadesGym,
+        pagina,
+        total: itens_tot[0].total,
+        itens_por_pagina: ITENS_POR_PAGINA,
     });
 })
 app.use("/treino", treino_router)

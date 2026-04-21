@@ -44,13 +44,14 @@ const index = async (req, res) => {
         }
     }
 
-    const [ itens ] = await pool.promise().query(montar_paginacao(query, pagina), argumentos)
-    let query_tot =  montar_query_total(query);
-    const [ item_tot ] = await pool.promise().query(query_tot, argumentos)
+    const [itens, itens_tot] = await Promise.all([
+        pool.promise().query(montar_paginacao(query, pagina), argumentos),
+        pool.promise().query(montar_query_total(query), argumentos)
+    ]).then((results) => [results[0][0], results[1][0]]);
 
     res.render(page, {
         layout: false,
-        total: item_tot[0].total,
+        total: itens_tot[0].total,
         pagina,
         entidade,
         itens,
