@@ -1,5 +1,11 @@
 const FORM = document.forms['form-principal'];
 const ITENS_CONTAINER = () => document.getElementById('itens-container');
+/**
+ * Substitui atributos no HTML de um item para criar um novo item vazio.
+ * @param {string} text - HTML original do item.
+ * @param {string} id - Novo ID para o item.
+ * @returns {string} HTML modificado para o novo item.
+ */
 function replaceAtributosParaNovoItem(text, id) {
     return text
         .replaceAll(/value="[^"]*"/g, 'value=""')
@@ -34,20 +40,28 @@ function gerencia_exluir(event) {
     event.target.closest('div[data-item="true"]').dispatchEvent(new Event('input'))
 
 }
+/**
+ * Verifica se algum input do item foi modificado e atualiza o campo 'pular_upsert[]'.
+ * @param {Element} container - Elemento do item (div[data-item="true"]).
+ * @returns {void}
+ */
+function gerenciar_upsert(container) {
+    if (!container.querySelector('input[name="pular_upsert[]"]')) return;
+    const input_modificado = [...container.querySelectorAll('input')].find(input => {
+        return input.dataset.valorInicial != undefined && input.dataset.valorInicial != input.value;
+    });
+    container.querySelector('input[name="pular_upsert[]"]').value = input_modificado ? 'N' : 'S';
+}
 
-export default function loadEvents() {
+export default function load_events() {
     const add_item = document.querySelectorAll("button[data-id='adicionar-item'");
     add_item.forEach(e => e.addEventListener('click', adicionar_item));
     const data_item = () => document.querySelectorAll('div[data-item="true"]');
-    data_item().forEach(e => {
-        e.addEventListener('input', (event) => {
-            if(!e.querySelector('input[name="pular_upsert[]"]')) return;
-            const input_modificado = [... e.querySelectorAll('input')].find(input => {
-                return input.dataset.valorInicial != undefined && input.dataset.valorInicial != input.value
-            })
-            e.querySelector('input[name="pular_upsert[]"]').value = input_modificado ? 'N' : 'S';
+    data_item().forEach(container_data_item => {
+        container_data_item.addEventListener('input', () => {
+            gerenciar_upsert(container_data_item);
         });
-        e.querySelector('input[data-remove-item]').addEventListener('change', gerencia_exluir)
+        container_data_item.querySelector('input[data-remove-item]').addEventListener('change', gerencia_exluir)
     });
     document.forms['form-principal'].addEventListener('htmx:configRequest', (e) => {
         const params = e.detail.parameters;
