@@ -31,11 +31,13 @@ app.get('/', async (req, res) => {
         entidades: EntidadesGym
     });
 })
-app.post('/pessoa', async (req, res) => {
-    await upsert_lista(EntidadesGym.pessoa, req.body)
-    return res.redirect('/pessoa')
-})
-app.get('/pessoa', async (req, res) => {
+/**
+ * Função para obter pessoas do banco de dados com paginação e filtros.
+ * @param {Object} req - Objeto de requisição Express.
+ * @param {Object} res - Objeto de resposta Express.
+ * @returns {Promise<void>}
+ */
+const get_pessoa = async (req, res) => {
     const entidade = EntidadesGym.pessoa;
     let pagina = req.query.pagina ?? 1;
     pagina = parseInt(pagina);
@@ -65,7 +67,12 @@ app.get('/pessoa', async (req, res) => {
         total: itens_tot[0].total,
         itens_por_pagina: ITENS_POR_PAGINA,
     });
+}
+app.post('/pessoa', async (req, res) => {
+    await upsert_lista(EntidadesGym.pessoa, req.body)
+    return get_pessoa(req, res);
 })
+app.get('/pessoa', get_pessoa)
 app.use("/treino", treino_router)
 try {
     app.listen(PORT, () => {
