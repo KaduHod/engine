@@ -12,7 +12,7 @@ const search = async (req, res) => {
     switch (req.query.coluna) {
         case 'pessoa':
             query = `select p.id as value, p.nome as label from pessoa p
-            WHERE p.nome COLLATE utf8mb4_0900_ai_ci LIKE CONCAT('%', ?, '%')
+            WHERE p.nome COLLATE utf8mb4_0900_ai_ci LIKE CONCAT('%', ?, '%') and deleted_at is null
             group by p.nome, p.id
             order by p.id`
             argumentos = [req.body.busca]
@@ -31,7 +31,11 @@ const index = async (req, res) => {
     const entidade = EntidadesGym.treino;
     let pagina = req.query.pagina ?? 1;
     pagina = parseInt(pagina);
-    let query = "SELECT t.*, p.id as pessoa_id, p.nome as pessoa FROM treino t left join pessoa p on p.id = t.pessoa_id where 1=1";
+    let query = `SELECT t.*, p.id as pessoa_id, p.nome as pessoa
+                    FROM treino t
+                left join pessoa p on p.id = t.pessoa_id and p.deleted_at is null
+                where t.deleted_at is null
+    `;
     let page = 'motor/form/form'
     let argumentos = []
     if(req.query.filtro) {

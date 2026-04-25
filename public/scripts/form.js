@@ -29,7 +29,7 @@ function adicionar_item() {
  * @param {Event} event - O objeto de evento do DOM.
  */
 function gerencia_exluir(event) {
-    event.target.parentNode.querySelector("input[type='hidden'][name='excluir[]']").value = event.target.checked;
+    event.target.parentNode.querySelector("input[type='hidden'][name='excluir[]']").value = event.target.checked ? 'S' : 'N';
 }
 export default function loadEvents() {
     const add_item = document.querySelectorAll("button[data-id='adicionar-item'");

@@ -39,7 +39,7 @@ app.get('/pessoa', async (req, res) => {
     const entidade = EntidadesGym.pessoa;
     let pagina = req.query.pagina ?? 1;
     pagina = parseInt(pagina);
-    let query = "SELECT * FROM pessoa p where 1=1";
+    let query = "SELECT * FROM pessoa p where deleted_at is null";
     let argumentos = []
     let page = 'motor/form/form'
     if(req.query.filtro) {
