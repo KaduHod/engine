@@ -1,0 +1,86 @@
+<%
+  const colunasVisiveis = entidade.colunas.filter(c => !c.hidden);
+  const acao = item.id ? 'editar' : 'criar';
+%>
+<h1 class="text-xl font-bold mb-4">
+  <%= acao === 'editar' ? 'Editar ' + entidade.nome : 'Novo ' + entidade.nome %>
+</h1>
+
+<form
+  name="form-<%= entidade.nome %>"
+  id="form-<%= entidade.nome %>"
+  hx-post="<%= entidade.http_path_name %><%= acao === 'editar' ? '/' + item.id : '' %>"
+  hx-target="main"
+  hx-swap="innerHTML"
+>
+  <%# Campos hidden (colunas ocultas) %>
+  <% entidade.colunas.filter(c => c.hidden).forEach(coluna => { %>
+    <input type="hidden" name="<%= coluna.nome %>" value="<%= item[coluna.nome] || '' %>">
+  <% }); %>
+
+  <%# Campos visíveis %>
+  <% colunasVisiveis.forEach(coluna => {
+    const value = item[coluna.nome] ?? '';
+    const isPk = coluna.pk;
+    const inputType = coluna.tipo === 'number' ? 'number' : coluna.tipo === 'boolean' ? 'checkbox' : 'text';
+  %>
+    <div class="mb-4">
+      <label for="<%= coluna.nome %>" class="block text-sm font-medium mb-1">
+        <%= coluna.label ?? coluna.nome %>
+      </label>
+
+      <% if (coluna.tipo === 'boolean') { %>
+        <input
+          type="checkbox"
+          id="<%= coluna.nome %>"
+          name="<%= coluna.nome %>"
+          class="h-5 w-5"
+          <%= isPk ? 'disabled' : '' %>
+          <%= value ? 'checked' : '' %>
+        />
+      <% } else if (coluna.tipo === 'label') { %>
+        <span class="text-gray-700"><%= value || '—' %></span>
+        <input type="hidden" name="<%= coluna.nome %>" value="<%= value %>" />
+      <% } else if (coluna.search) { %>
+        <div class="relative" data-search-field>
+          <input
+            type="text"
+            id="<%= coluna.nome %>"
+            name="<%= coluna.nome %>"
+            placeholder="Digite para buscar..."
+            class="w-full p-2 border border-gray-300 rounded-md text-sm"
+            autocomplete="off"
+            value="<%= value %>"
+            data-search-input
+          />
+          <ul class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-sm mt-1 max-h-48 overflow-y-auto" data-search-dropdown></ul>
+          <input type="hidden" name="<%= coluna.nome %>_id" value="<%= item[coluna.nome + '_id'] || '' %>" data-search-hidden>
+        </div>
+      <% } else { %>
+        <input
+          type="<%= inputType %>"
+          id="<%= coluna.nome %>"
+          name="<%= coluna.nome %>"
+          value="<%= value %>"
+          class="w-full border border-gray-300 rounded px-3 py-2 min-h-[44px] <%= isPk ? 'bg-gray-100' : '' %>"
+          <%= isPk ? 'readonly' : '' %>
+          <%= coluna.tipo === 'number' ? 'step="any"' : '' %>
+        />
+      <% } %>
+
+      <% if (coluna.fk) { %>
+        <p class="text-xs text-gray-400 mt-1">Referência: <%- coluna.fk %></p>
+      <% } %>
+    </div>
+  <% }); %>
+
+  <%# Botões %>
+  <div class="mt-6 flex flex-col sm:flex-row gap-3">
+    <button
+      type="submit"
+      class="w-full sm:w-auto bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600 min-h-[44px]"
+    >
+      Salvar
+    </button>
+  </div>
+</form>

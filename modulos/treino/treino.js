@@ -86,8 +86,28 @@ const treino_exercicio = async (req, res) => {
         entidades: EntidadesGym
     });
 }
+/** @type {import('express').RequestHandler} */
+const treino_form = async (req, res) => {
+    const id = req.params.id
+    const entidade = EntidadesGym.treino;
+    let query = `SELECT t.*, p.id as pessoa_id, p.nome as pessoa
+                    FROM treino t
+                left join pessoa p on p.id = t.pessoa_id and p.deleted_at is null
+                where t.deleted_at is null and t.id = ?
+    `;
+    const [item] = await pool.promise().query(query, [id])
+    console.log(item, query)
+    res.render('motor/form/form_entidade', {
+        layout: false,
+        entidade,
+        item,
+        entidades: EntidadesGym
+    });
+
+}
 
 treino_router.get("/", index);
+treino_router.get("/:id", treino_form);
 treino_router.post("/search", search);
 treino_router.get("/exercicio", exercicio);
 treino_router.get("/treino_exercicio", treino_exercicio);
