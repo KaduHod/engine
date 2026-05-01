@@ -15,19 +15,25 @@ function replaceAtributosParaNovoItem(text, id) {
         .replaceAll(/data-item-label="true">[^<]*</g, ">...<")
         .replaceAll(/data-id="[^"]*"/g, `data-id='${id}'`);
 }
-
-function adicionar_item() {
+/**
+ * @param {EventTarget} [target]
+**/
+function adicionar_item(target) {
+    console.log('chamando')
     // Mobile
     const primeiro_item = document.querySelector('div[data-item="true"]');
     if(primeiro_item.innerHTML) {
         const novo_id = "___"+Math.random().toString(36).substring(2, 10);
         const novo_html = replaceAtributosParaNovoItem(primeiro_item.outerHTML, novo_id);
-        ITENS_CONTAINER().insertAdjacentHTML('afterbegin', novo_html);
-        const novo_item = ITENS_CONTAINER().querySelector(`div[data-id="${novo_id}"]`);
-        novo_item.querySelector('input[type="hidden"][name="id[]"]').value = novo_id;
+        const container_alvo = target.dataset.itemContainerId ? document.querySelector(`div[data-item-container-id='${target.dataset.itemContainerId}']`) : ITENS_CONTAINER();
+        container_alvo.insertAdjacentHTML('afterbegin', novo_html);
+        const novo_item = container_alvo.querySelector(`div[data-id="${novo_id}"]`);
+        novo_item.querySelector('input[type="hidden"][data-pk="true"]').value = novo_id;
         novo_item.querySelector('input[data-remove-item]').addEventListener('change', gerencia_exluir);
-        novo_item.querySelector('input[name="pular_upsert[]"]').value = 'N';
+        novo_item.querySelector('input[type="hidden"][data-pular-upsert="true"]').value = 'N';
         htmx.process(novo_item);
+
+        console.log('chamando')
     }
 }
 /**
@@ -36,7 +42,7 @@ function adicionar_item() {
  * @param {Event} event - O objeto de evento do DOM.
  */
 function gerencia_exluir(event) {
-    event.target.parentNode.querySelector("input[type='hidden'][name='excluir[]']").value = event.target.checked ? 'S' : 'N';
+    event.target.parentNode.querySelector("input[type='hidden'][data-excluir='true']").value = event.target.checked ? 'S' : 'N';
     event.target.closest('div[data-item="true"]').dispatchEvent(new Event('input'))
 
 }
@@ -46,16 +52,16 @@ function gerencia_exluir(event) {
  * @returns {void}
  */
 function gerenciar_upsert(container) {
-    if (!container.querySelector('input[name="pular_upsert[]"]')) return;
+    if (!container.querySelector('input[type="hidden"][data-pular-upsert="true"]')) return;
     const input_modificado = [...container.querySelectorAll('input')].find(input => {
         return input.dataset.valorInicial != undefined && input.dataset.valorInicial != input.value;
     });
-    container.querySelector('input[name="pular_upsert[]"]').value = input_modificado ? 'N' : 'S';
+    container.querySelector('input[type="hidden"][data-pular-upsert="true"]').value = input_modificado ? 'N' : 'S';
 }
 
 export default function load_events() {
     const add_item = document.querySelectorAll("button[data-id='adicionar-item'");
-    add_item.forEach(e => e.addEventListener('click', adicionar_item));
+    add_item.forEach(e => e.addEventListener('click', ({target}) => adicionar_item(target)));
     const data_item = () => document.querySelectorAll('div[data-item="true"]');
     data_item().forEach(container_data_item => {
         container_data_item.addEventListener('input', () => {

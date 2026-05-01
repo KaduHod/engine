@@ -22,7 +22,7 @@
           <% entidade.colunas.filter(c => c.hidden).forEach(coluna => { %>
             <input type="hidden" data-valor-inicial="<%= item[coluna.nome] || '' %>" name="<%= coluna.nome %>" value="<%= item[coluna.nome] || '' %>">
           <% }) %>
-            <input type="hidden" name="pular_upsert[]" value="S">
+            <input type="hidden" data-pular-upsert="true" name="pular_upsert[]" value="S">
           <%# Campos visíveis %>
           <% colunasVisiveis.forEach(coluna => { %>
 
@@ -36,7 +36,7 @@
                 <span class="text-sm" data-item-pk="true"><%= item[coluna.nome] || '' %></span>
               </div>
 
-                <input type="hidden"  data-valor-inicial="<%= item[coluna.nome] || '' %>" name="<%= coluna.nome %>[]" value="<%= item[coluna.nome] || '' %>">
+                <input type="hidden" data-pk="true" data-valor-inicial="<%= item[coluna.nome] || '' %>" name="<%= coluna.nome %>[]" value="<%= item[coluna.nome] || '' %>">
             <% } else { %>
               <%
                 let inputType = 'text';
@@ -102,6 +102,7 @@
             <input
                 type="hidden"
                 name="excluir[]"
+                data-excluir="true"
                 data-valor-inicial="N"
                 value="N">
             <input
