@@ -106,8 +106,8 @@ const treino_form = async (req, res) => {
 }
 
 treino_router.get("/", index);
-treino_router.get("/:id", treino_form);
 treino_router.post("/search", search);
 treino_router.get("/exercicio", exercicio);
 treino_router.get("/treino_exercicio", treino_exercicio);
+treino_router.get("/:id", treino_form);
 export default treino_router;
