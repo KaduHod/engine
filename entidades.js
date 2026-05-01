@@ -23,6 +23,7 @@
  * @property {string} nome
  * @property {string} http_path_name
  * @property {string} tabela
+ * @property {Entidade[]} [filhos]
  * @property {TipoEntidade} tipo
  * @property {Coluna[]} colunas
  */
@@ -60,6 +61,7 @@ const exercicio_treino = {
     modulo: "treino",
     tabela: "treino_exercise",
     tipo: "lista",
+    filhos: [exercicio],
     colunas: [
         DEFAULT_ID,
         {
@@ -98,6 +100,7 @@ const treino = {
     http_path_name: "treino",
     tipo: "lista",
     modulo: "treino",
+    filhos: [exercicio_treino],
     colunas: [
         DEFAULT_ID,
         {
@@ -116,6 +119,7 @@ const treino = {
         }
     ]
 }
+
 /** @type {Entidade} */
 const pessoa = {
     nome: "Pessoa",

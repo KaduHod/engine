@@ -78,6 +78,41 @@
     </div>
   <% }); %>
 
+  <%# Lista de itens dos filhos (tipo lista) %>
+  <% if (entidade.filhos && entidade.filhos.length) { %>
+    <% entidade.filhos.forEach(filho => { if(filho.tipo === 'lista') { %>
+      <h2 class="text-lg font-bold mt-8 mb-1"><%= filho.nome %></h2>
+      <div class="hidden md:grid items-center bg-gray-100 border border-gray-300 px-2 py-1 gap-2"
+           style="grid-template-columns: <%= filho.colunas.filter(c => !c.hidden).map(c => (c.pk || c.tipo === 'boolean') ? 'min-content' : 'minmax(min-content, 1fr)').join(' ') + ' min-content' %>">
+        <% filho.colunas.filter(c => !c.hidden).forEach(colunaF => { %>
+        <div class="px-2 py-1 text-sm font-medium whitespace-nowrap"><%= colunaF.label ?? colunaF.nome %></div>
+        <% }) %>
+        <div class="px-2 py-1 text-sm font-medium whitespace-nowrap">Ações</div>
+      </div>
+      <div id="itens-filho-<%= filho.tabela %>">
+        <% (item[filho.tabela] || []).forEach((itemF, idxF) => { %>
+          <div data-item="true"
+            class="border border-gray-300 rounded-lg p-4 mb-3 bg-white shadow-sm md:rounded-none md:p-0 md:mb-0 md:shadow-none md:border-0 md:border-b md:grid md:items-center md:gap-2 md:px-2"
+            style="grid-template-columns: <%= filho.colunas.filter(c => !c.hidden).map(c => (c.pk || c.tipo === 'boolean') ? 'min-content' : 'minmax(min-content, 1fr)').join(' ') + ' min-content' %>">
+            <% filho.colunas.filter(c => !c.hidden).forEach(colunaF => { %>
+              <div class="mb-3 md:mb-0 md:py-1">
+                <input
+                  type="text"
+                  class="w-full p-2 border rounded min-h-[44px] text-sm"
+                  name="<%= filho.tabela + '[' + idxF + '][' + colunaF.nome + ']' %>"
+                  value="<%= itemF[colunaF.nome] || '' %>">
+              </div>
+            <% }) %>
+            <div><!-- ações placeholder --></div>
+          </div>
+        <% }); %>
+        <% if (!(item[filho.tabela] && item[filho.tabela].length)) { %>
+          <div class="text-gray-400 text-sm px-3 py-2">Nenhum item cadastrado.</div>
+        <% } %>
+      </div>
+    <% } }); %>
+  <% } %>
+
   <%# Botões %>
   <div class="mt-6 flex flex-col sm:flex-row gap-3">
     <button
