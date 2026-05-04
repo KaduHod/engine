@@ -5,56 +5,70 @@ import pool from "./database/conn.js";
  * Processa cada entrada em `body.id` gerando comandos INSERT, UPDATE ou DELETE.
  * @param {import('./entidades.js').Entidade} entidade - A definição da entidade.
  * @param {Object} body - O corpo da requisição com arrays de valores (mesmo formato de upsert_lista).
+ * @param {any} [parent_id] - Id do pai se houver se houver
  * @returns {{ querys: Record<string, string>, argumentos: Record<string, any[]> }}
  *   Objeto com `querys` (chave = id) e `argumentos` (chave = id, array de argumentos para a query).
  */
-export function build_upsert_querys(entidade, body) {
-        let querys = {};
-        let argumentos = {};
-        body.id.forEach((id, index) => {
-            let argumentos_curr = [];
-            if (body.pular_upsert && body.pular_upsert[index] === 'S') return;
+export function build_upsert_querys(entidade, body, parent_id = null) {
+    let querys = {};
+    let argumentos = {};
+    body.id.forEach((id, index) => {
+        let argumentos_curr = [];
+        if (body.pular_upsert && body.pular_upsert[index] === 'S') return;
 
-            if (id && id[0] !== '_' && body.excluir && body.excluir[index] === 'S') {
-                // DELETE
-                querys[id] = `update ${entidade.tabela} set deleted_at = now() where id = ?`;
-                argumentos_curr = [id];
-            } else if (id && id[0] !== '_') {
-                // UPDATE
-                let values = Object.keys(body)
-                    .filter(coluna => entidade.colunas.find(c => {
-                        return (
-                            (c.nome === coluna && !c.pk) ||
-                            (c.fk && coluna.endsWith('_id') && c.nome === coluna.replace('_id', ''))
-                        );
-                    }))
-                    .map(coluna => {
+        if (id && id[0] !== '_' && body.excluir && body.excluir[index] === 'S') {
+            // DELETE
+            querys[id] = `update ${entidade.tabela} set deleted_at = now() where id = ?`;
+            argumentos_curr = [id];
+        } else if (id && id[0] !== '_') {
+            // UPDATE
+            let values = Object.keys(body)
+                .filter(coluna => entidade.colunas.find(c => {
+                    return (
+                        (c.nome === coluna && !c.pk) ||
+                        (c.fk && coluna.endsWith('_id') && c.nome === coluna.replace('_id', '')) ||
+                        (c.fk && c.parent)
+                    );
+                }))
+                .map(coluna => {
+                    const coluna_entidade = entidade.colunas.find(c => c.nome == coluna);
+                    if(coluna_entidade.parent && parent_id) {
+                        argumentos_curr.push(parent_id);
+                        return `${coluna}_id = ?`;
+                    } else {
                         argumentos_curr.push(body[coluna][index]);
                         return `${coluna} = ?`;
-                    });
-                argumentos_curr.push(id);
-                querys[id] = `update ${entidade.tabela} set ${values.join(", ")} where id = ?`;
-            } else if (!body.excluir || body.excluir[index] !== 'S') {
-                // INSERT
-                let colunas = Object.keys(body)
-                    .filter(coluna => entidade.colunas.find(c => {
-                        return (
-                            (c.nome === coluna && !c.pk) ||
-                            (c.fk && coluna.endsWith('_id') && c.nome === coluna.replace('_id', ''))
-                        );
-                    }))
-                    .map(coluna => {
+                    }
+                });
+            argumentos_curr.push(id);
+            querys[id] = `update ${entidade.tabela} set ${values.join(", ")} where id = ?`;
+        } else if (!body.excluir || body.excluir[index] !== 'S') {
+            // INSERT
+            let colunas = Object.keys(body)
+                .filter(coluna => entidade.colunas.find(c => {
+                    return (
+                        (c.nome === coluna && !c.pk) ||
+                        (c.fk && coluna.endsWith('_id') && c.nome === coluna.replace('_id', ''))
+                    );
+                }))
+                .map(coluna => {
+                    const coluna_entidade = entidade.colunas.find(c => c.nome == coluna);
+                    if(coluna_entidade && coluna_entidade.parent && parent_id) {
+                        argumentos_curr.push(parent_id);
+                        return coluna+"_id";
+                    } else {
                         argumentos_curr.push(body[coluna][index]);
                         return coluna;
-                    });
-                const placeholders = colunas.map(() => '?').join(', ');
-                querys[id] = `insert into ${entidade.tabela} (${colunas.join(", ")}) values (${placeholders})`;
-            }
-            argumentos[id] = argumentos_curr;
-        });
+                    }
+                });
+            const placeholders = colunas.map(() => '?').join(', ');
+            querys[id] = `insert into ${entidade.tabela} (${colunas.join(", ")}) values (${placeholders})`;
+        }
+        argumentos[id] = argumentos_curr;
+    });
 
-        return { querys, argumentos };
-    }
+    return { querys, argumentos };
+}
 
 
 
@@ -65,49 +79,6 @@ export function build_upsert_querys(entidade, body) {
     * @returns {Promise<any[]>} The result of the database operation.
  */
 export async function upsert_lista(entidade, body) {
-    // let querys = {};
-    // let query = "";
-    // let argumentos = {};
-    // body.id.forEach((id, index) => {
-    //     let argumentos_curr = [];
-    //     if(body.pular_upsert[index] == 'S') return;
-    //     if(id[0] != '_' && body.excluir && body.excluir[index] == 'S') { // DELETE
-    //         query = `update ${entidade.tabela} set deleted_at = now() where id = ?`;
-    //         argumentos_curr = [id];
-    //         querys[id] = query;
-    //     } else if(id && id[0] != "_") { // UPDATE
-    //         let values = Object.keys(body)
-    //             .filter( coluna => entidade.colunas.find(c => {
-    //                 return (
-    //                     (c.nome == coluna && !c.pk) // tratamento para colunas da entidade
-    //                     || (c.fk && coluna.endsWith('_id') && c.nome == coluna.replace('_id', '')) // tratamento para fk's
-    //                 )
-    //             }))
-    //             .map((coluna) => {
-    //                 argumentos_curr.push(body[coluna][index]);
-    //                 return `${coluna} = ?`
-    //             })
-    //         argumentos_curr.push(id);
-    //         let update = `update ${entidade.tabela} set ` + values.join(", ") + ` where id = ?`;
-    //         console.log(update, argumentos_curr)
-    //         querys[id] = update;
-    //     } else if(body.excluir[index] != 'S') { // INSERT
-    //         let colunas = Object.keys(body)
-    //             .filter((coluna) => entidade.colunas.find(c => {
-    //                 return (
-    //                         (c.nome == coluna && !c.pk)
-    //                         || (c.fk && coluna.endsWith('_id') && c.nome == coluna.replace('_id', ''))
-    //                     )
-    //             }))
-    //             .map((coluna) => {
-    //                 argumentos_curr.push(body[coluna][index]);
-    //                 return coluna;
-    //             });
-    //         let insert = `insert into ${entidade.tabela} (${colunas.join(", ")}) values (${colunas.map(() => "?").join(", ")})`;
-    //         querys[id] = insert;
-    //     }
-    //     argumentos[id] = argumentos_curr;
-    // })
     const { querys, argumentos } = build_upsert_querys(entidade, body);
     const conn = await pool.promise().getConnection();
     const promises = [];
@@ -131,13 +102,11 @@ export async function upsert_lista(entidade, body) {
  * Performs an upsert (insert or update) operation for a given entity.
  * @param {import('./entidades.js').Entidade} entidade - The entity definition.
  * @param {Object} body - The request body (express req.body) containing column values.
- * @param {Partial<Record<import('./entidades.js').TiposEntidadesGym, import('./entidades.js').Entidade>>} entidades - The entity definitions keyed by entity type.
  * @returns {Promise<any[]>} The result of the database operation.
  */
-export async function upsert_entidade(entidade, body, entidades) {
-    console.log(entidade, body)
-    let querys = [];
-    let argumentos = [[]];
+export async function upsert_entidade(entidade, body) {
+    let querys = {0:""};
+    let argumentos = {0:[]};
     // tratar entidade pai
     let colunas_query_entidade_pai = Object.keys(body).map((coluna) => {
         if(['filhos', 'id'].indexOf(coluna) > -1) return null;
@@ -150,20 +119,17 @@ export async function upsert_entidade(entidade, body, entidades) {
             return coluna_entidade.nome + ' = ?';
         }
     }).filter(q => q);
-    querys.push(`update ${entidade.tabela} set ${colunas_query_entidade_pai.join(", ")} where id = ?`);
+    querys[0] = `update ${entidade.tabela} set ${colunas_query_entidade_pai.join(", ")} where id = ?`;
+    argumentos[0].push(body.id);
     if(body.filhos) {
         Object.keys(body.filhos).forEach((filho) => {
-
             const entidade_filho = entidade.filhos.find(entidade_filho => entidade_filho.tabela == filho);
             if(!entidade_filho) return;
-            let config_filhos = build_upsert_querys(entidade_filho, body.filhos[filho].pop());
-            console.log(config_filhos)
-            querys = [...querys, ...config_filhos.querys ];
-            argumentos = [...argumentos, ...config_filhos.argumentos];
+            let config_filhos = build_upsert_querys(entidade_filho, body.filhos[filho].pop(), body.id);
+            querys = {...querys, ...config_filhos.querys};
+            argumentos = {...argumentos, ...config_filhos.argumentos};
         })
     }
-
-    /// FINALIZAR PARTE DE INSERCAO NO BANCO
     const conn = await pool.promise().getConnection();
     const promises = [];
     let result = null;

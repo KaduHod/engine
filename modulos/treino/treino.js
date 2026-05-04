@@ -19,7 +19,7 @@ const search = async (req, res) => {
             order by p.id`
             argumentos = [req.body.busca]
             break;
-        case 'exercicio':
+        case 'exercise':
             query = `select e.id as value, e.name as label from search_exercise e
             WHERE e.descr_like COLLATE utf8mb4_0900_ai_ci LIKE CONCAT('%', ?, '%')
             group by e.id, e.name

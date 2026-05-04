@@ -13,6 +13,7 @@
  * @property {boolean} [hidden=false]
  * @property {boolean|string} [search=false] // todo search deve ser fk
  * @property {string} [fk]
+ * @property {boolean} [parent]
  * @property {string} [fk_tabela]
  * @property {boolean} [filtro=false]
  */
@@ -68,9 +69,11 @@ const exercicio_treino = {
             tipo: "number",
             hidden: true,
             fk: "treino",
+            parent: true
         },
         {
-            nome: "exercicio",
+            nome: "exercise",
+            label: "Exercicio",
             tipo: "number",
             fk: "exercise",
             search: "name",
