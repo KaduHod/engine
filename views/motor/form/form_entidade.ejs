@@ -70,6 +70,7 @@
       <% } else if (isPk) { %>
         <div class="flex items-center h-[44px] px-2 rounded border border-gray-200 bg-gray-50 cursor-default">
           <span class="text-sm" data-item-pk="true"><%= value || '' %></span>
+          <input type="hidden" name="<%= coluna.nome %>" value="<%= itens[entidade.nome][coluna.nome] || '' %>">
         </div>
 
       <% } else { %>
@@ -125,7 +126,7 @@
           <%
             const itensFilho = (itens.filhos[filho.nome] && itens.filhos[filho.nome].length)
               ? itens.filhos[filho.nome]
-              : [{}];
+              : [{id:'__0'}];
             itensFilho.forEach((itemF, idxF) => {
           %>
           <div data-item="true" data-id="<%= idxF %>"

@@ -4,7 +4,7 @@ import pool from "../../database/conn.js";
 import { gerar_filtro_sql_entidade, montar_paginacao, montar_query_total } from "../../filtro.js";
 import { ITENS_POR_PAGINA } from "../../config.js";
 import { carregar_entidades } from "../../carregar_antidades.js";
-import { upsert_lista } from "../../upsert.js";
+import { upsert_entidade, upsert_lista } from "../../upsert.js";
 const treino_router = e.Router();
 
 /** @type {import('express').RequestHandler} */
@@ -118,8 +118,14 @@ const treino_form = async (req, res) => {
 const treino_lista_upsert = async (req, res) => {
     console.log(req.body)
     const entidade = EntidadesGym.treino;
-    await upsert_lista(entidade, req.body);
+    await upsert_lista(entidade, req.body, EntidadesGym);
     return index(req, res);
+}
+
+/** @type {import('express').RequestHandler} */
+const treino_upsert = async (req, res) => {
+    const entidade = EntidadesGym.treino;
+    await upsert_entidade(entidade, req.body)
 }
 
 treino_router.get("/", index);
@@ -129,4 +135,5 @@ treino_router.get("/treino_exercicio", treino_exercicio);
 treino_router.post("/treino_exercicio/search", search);
 treino_router.get("/:id", treino_form);
 treino_router.post("/", treino_lista_upsert);
+treino_router.post("/:id", treino_upsert);
 export default treino_router;
