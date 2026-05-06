@@ -3,7 +3,7 @@
  */
 
 export function montar_query_entidade(entidade) {
-  const { joins, colunas } = entidade.colunas
+  let { joins, colunas } = entidade.colunas
     .filter((c) => c.fk)
     .reduce(
       (acc, col) => {
@@ -22,13 +22,12 @@ export function montar_query_entidade(entidade) {
       },
       { joins: [], colunas: [] },
     );
-
   const campos_entidade = entidade.colunas
     .filter((c) => !c.fk)
-    .map((c) => `${entidade.tabela}.${c.nome} as ${c.nome}`)
-    .join(", ");
+    .map((c) => `${entidade.tabela}.${c.nome} as ${c.nome}`);
+    const cols = [...campos_entidade, ...colunas].join(', ');
   const sql = `
-        SELECT ${campos_entidade}, ${colunas.join(", ")}
+        SELECT ${cols}
         FROM ${entidade.tabela}
         ${joins.join("\n ")}
         WHERE 1=1 and ${entidade.tabela}.deleted_at is null
