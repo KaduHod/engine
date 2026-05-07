@@ -160,6 +160,10 @@ const treino = {
         {
             tipo: "lista",
             entidade: exercicio_treino
+        },
+        {
+            tipo: "link",
+            entidade: treinado
         }
     ],
     colunas: [

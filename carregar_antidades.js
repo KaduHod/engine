@@ -61,6 +61,7 @@ export async function carregar_entidades(pool, entidade_pai, id) {
 
         if(entidade_pai.filhos  && entidade_pai.filhos.length > 0) {
             entidade_pai.filhos.forEach((filho) => {
+                if(filho.tipo === 'link') return;
                 let query_filho = montar_query_entidade(filho.entidade).replace(
                     "WHERE 1=1",
                     `WHERE 1=1 and ${filho.entidade.tabela}.${entidade_pai.tabela}_id = ?`,

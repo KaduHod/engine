@@ -92,7 +92,7 @@
 
   <%# Lista de itens dos filhos (tipo lista) %>
   <% if (entidade.filhos && entidade.filhos.length) { %>
-    <% entidade.filhos.forEach(filho => { if(filho.entidade.tipo === 'lista') { %>
+  <% entidade.filhos.filter(filho => filho.tipo == 'lista').forEach(filho => { %>
       <h2 class="text-lg font-bold mt-8 mb-1"><%= filho.entidade.nome %></h2>
 
       <%
@@ -220,17 +220,7 @@
         <% }); %>
 
       </div>
-        <div class="mt-5 flex flex-col sm:flex-row gap-3">
-            <button
-                    type="button"
-                    data-id="adicionar-item"
-                    data-item-container-id="<%= filho.entidade.nome %>"
-                    class="w-full cursor-pointer sm:w-auto bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 min-h-[44px]"
-                    >
-                    + Adicionar
-            </button>
-        </div>
-    <% } }); %>
+    <% }); %>
   <% } %>
 
   <%# Botões %>
@@ -241,8 +231,20 @@
     >
       Salvar
     </button>
+    <%# Links para entidades filhas do tipo link %>
+    <% if (entidade.filhos && entidade.filhos.length) { %>
+      <% entidade.filhos.forEach(filho => { if (filho.tipo === 'link') { %>
+        <a
+          href="/<%= filho.entidade.http_path_name %>/<%= itens[entidade.nome].id || '' %>"
+          class="inline-block bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 min-h-[44px] text-center"
+        >
+          Ver <%= filho.entidade.nome %>
+        </a>
+      <% } }); %>
+    <% } %>
   </div>
 </form>
+
 <script type="module" src="scripts/form.js"></script>
 <script type="module" src="scripts/search.js"></script>
 <script type="module">
