@@ -2,6 +2,7 @@
 /**
  * @typedef {"string" | "number" | "boolean" | "label" } TipoColuna
  * @typedef {"unico" | "lista" } TipoEntidade
+ * @typedef {"lista" | "link" } TipoFilho
  * @typedef {"treino" | "exercicio" | "pessoa" | "exercicio_treino"} TiposEntidadesGym
  */
 /**
@@ -19,15 +20,21 @@
  */
 
 /**
+ * @typedef {Object} FilhoConfig
+ * @property {Entidade} entidade
+ * @property {string} [tipo="lista"]
+**/
+
+/**
  * @typedef {Object} Entidade
  * @property {string} [modulo]
  * @property {string} nome
  * @property {string} http_path_name
  * @property {string} tabela
- * @property {boolean} [possui_form]
- * @property {Entidade[]} [filhos]
+ * @property {FilhoConfig[]} [filhos]
  * @property {TipoEntidade} tipo
  * @property {Coluna[]} colunas
+ * @property {boolean} [possui_form]
  */
 
 
@@ -57,13 +64,56 @@ const exercicio = {
     ]
 }
 
+
+/** @type {Entidade} */
+const treinado = {
+    nome: "Treinado",
+    http_path_name: "treino/treinado",
+    tabela: "treinado",
+    tipo: "lista",
+    filhos: [],
+    colunas: [
+        {...DEFAULT_ID, hidden:true},
+        {
+            nome: "exercise",
+            label: "Exercicio",
+            tipo: "label",
+            fk: "exercise",
+            search: "name",
+        },
+        {
+            nome: "peso",
+            label: "Peso",
+            tipo: "number",
+        },
+        {
+            nome: "series",
+            label: "Séries",
+            tipo: "number",
+        },
+        {
+            nome: "repeticoes",
+            label: "Repetições",
+            tipo: "string",
+        }
+    ]
+}
 /** @type {Entidade} */
 const exercicio_treino = {
     nome: "Exercicio Treino",
     http_path_name: "treino/treino_exercicio",
     tabela: "treino_exercise",
     tipo: "lista",
-    filhos: [exercicio],
+    filhos: [
+        {
+            tipo: "lista",
+            entidade: exercicio
+        },
+        {
+            tipo: "link",
+            entidade: treinado
+        }
+    ],
     colunas: [
         {...DEFAULT_ID, hidden:true},
         {
@@ -106,7 +156,12 @@ const treino = {
     http_path_name: "treino",
     tipo: "lista",
     modulo: "treino",
-    filhos: [exercicio_treino],
+    filhos: [
+        {
+            tipo: "lista",
+            entidade: exercicio_treino
+        }
+    ],
     colunas: [
         DEFAULT_ID,
         {
@@ -143,6 +198,16 @@ const pessoa = {
         }
     ]
 }
+treinado.filhos = [
+    {
+        tipo: "link",
+        entidade: exercicio_treino
+    },
+    {
+        tipo: "link",
+        entidade: treino
+    }
+]
 
 /**
     @type {Partial<Record<TiposEntidadesGym, Entidade>>}

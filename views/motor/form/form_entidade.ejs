@@ -92,12 +92,12 @@
 
   <%# Lista de itens dos filhos (tipo lista) %>
   <% if (entidade.filhos && entidade.filhos.length) { %>
-    <% entidade.filhos.forEach(filho => { if(filho.tipo === 'lista') { %>
-      <h2 class="text-lg font-bold mt-8 mb-1"><%= filho.nome %></h2>
+    <% entidade.filhos.forEach(filho => { if(filho.entidade.tipo === 'lista') { %>
+      <h2 class="text-lg font-bold mt-8 mb-1"><%= filho.entidade.nome %></h2>
 
       <%
         // Grid columns para o filho (mesmo esquema de itens_container)
-        const colunasFilhoVisiveis = filho.colunas.filter(c => !c.hidden);
+        const colunasFilhoVisiveis = filho.entidade.colunas.filter(c => !c.hidden);
         const gridColsFilho = colunasFilhoVisiveis.map(c => {
           if (c.pk || c.tipo === 'boolean') return 'min-content';
           return 'minmax(min-content, 1fr)';
@@ -107,7 +107,7 @@
             <button
                     type="button"
                     data-id="adicionar-item"
-                    data-item-container-id="<%= filho.nome %>"
+                    data-item-container-id="<%= filho.entidade.nome %>"
                     class="w-full sm:w-auto cursor-pointer bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 min-h-[44px]"
                     >
                     + Adicionar
@@ -122,10 +122,10 @@
         <div class="px-2 py-1 text-sm font-medium whitespace-nowrap">Ações</div>
       </div>
 
-      <div data-item-container-id="<%= filho.nome %>" id="itens-filho-<%= filho.tabela %>">
+      <div data-item-container-id="<%= filho.entidade.nome %>" id="itens-filho-<%= filho.entidade.tabela %>">
           <%
-            const itensFilho = (itens.filhos[filho.nome] && itens.filhos[filho.nome].length)
-              ? itens.filhos[filho.nome]
+            const itensFilho = (itens.filhos[filho.entidade.nome] && itens.filhos[filho.entidade.nome].length)
+              ? itens.filhos[filho.entidade.nome]
               : [{id:'__0'}];
             itensFilho.forEach((itemF, idxF) => {
           %>
@@ -134,15 +134,15 @@
             style="grid-template-columns: <%= gridColsFilho %>">
 
             <%# Campos hidden do filho %>
-            <% filho.colunas.filter(c => c.hidden).forEach(colunaF => { %>
+            <% filho.entidade.colunas.filter(c => c.hidden).forEach(colunaF => { %>
               <% if(colunaF.pk) { %>
-                  <input type="hidden" data-pk="true" name="filhos[<%= filho.tabela %>][<%= idxF %>][<%= colunaF.nome %>][]" value="<%= itemF[colunaF.nome] || '' %>">
+                  <input type="hidden" data-pk="true" name="filhos[<%= filho.entidade.tabela %>][<%= idxF %>][<%= colunaF.nome %>][]" value="<%= itemF[colunaF.nome] || '' %>">
               <% } else { %>
-                  <input type="hidden" name="filhos[<%= filho.tabela %>][<%= idxF %>][<%= colunaF.nome %>][]" value="<%= itemF[colunaF.nome] || '' %>">
+                  <input type="hidden" name="filhos[<%= filho.entidade.tabela %>][<%= idxF %>][<%= colunaF.nome %>][]" value="<%= itemF[colunaF.nome] || '' %>">
               <% } %>
             <% }) %>
 
-            <input type="hidden" name="filhos[<%= filho.tabela %>][<%= idxF %>][pular_upsert][]" data-pular-upsert="true" value="S">
+            <input type="hidden" name="filhos[<%= filho.entidade.tabela %>][<%= idxF %>][pular_upsert][]" data-pular-upsert="true" value="S">
 
             <% colunasFilhoVisiveis.forEach(colunaF => { %>
               <div class="mb-3 md:mb-0 md:py-1">
@@ -155,7 +155,7 @@
                     <input type="checkbox"
                            class="h-5 w-5"
                             data-valor-inicial="<%= itemF[colunaF.nome] || '' %>"
-                           name="filhos[<%= filho.tabela %>][<%= idxF %>][<%= colunaF.nome %>][]"
+                           name="filhos[<%= filho.entidade.tabela %>][<%= idxF %>][<%= colunaF.nome %>][]"
                            <%= itemF[colunaF.nome] ? 'checked' : '' %>>
                   </div>
 
@@ -163,13 +163,13 @@
                   <div class="flex items-center h-[44px] px-2 rounded border border-gray-200 bg-gray-50">
                     <span class="text-sm"><%= itemF[colunaF.nome] || '—' %></span>
                   </div>
-                  <input type="hidden" name="filhos[<%= filho.tabela %>][<%= idxF %>][<%= colunaF.nome %>][]" value="<%= itemF[colunaF.nome] || '' %>">
+                  <input type="hidden" name="filhos[<%= filho.entidade.tabela %>][<%= idxF %>][<%= colunaF.nome %>][]" value="<%= itemF[colunaF.nome] || '' %>">
 
                 <% } else if (colunaF.search) { %>
                   <div class="relative" data-search-field>
                     <input
                       type="text"
-                      hx-post="/<%= filho.http_path_name || entidade.http_path_name %>/search?coluna=<%= colunaF.nome %>"
+                      hx-post="/<%= filho.entidade.http_path_name || entidade.http_path_name %>/search?coluna=<%= colunaF.nome %>"
                       hx-trigger="keyup changed delay:500ms"
                       hx-target="next ul"
                       hx-params="busca"
@@ -182,14 +182,14 @@
                       data-search-input
                     >
                     <ul class="hidden absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-sm mt-1 max-h-48 overflow-y-auto" data-search-dropdown></ul>
-                    <input data-valor-inicial="<%= itemF[colunaF.nome + '_id'] || '' %>" type="hidden" name="filhos[<%= filho.tabela %>][<%= idxF %>][<%= colunaF.nome %>_id][]" value="<%= itemF[colunaF.nome + '_id'] || '' %>" data-search-hidden>
+                    <input data-valor-inicial="<%= itemF[colunaF.nome + '_id'] || '' %>" type="hidden" name="filhos[<%= filho.entidade.tabela %>][<%= idxF %>][<%= colunaF.nome %>_id][]" value="<%= itemF[colunaF.nome + '_id'] || '' %>" data-search-hidden>
                   </div>
 
                 <% } else if (colunaF.pk) { %>
                   <div class="flex items-center h-[44px] px-2 rounded border border-gray-200 bg-gray-50 cursor-default">
                     <span class="text-sm"><%= itemF[colunaF.nome] || '' %></span>
                   </div>
-                  <input data-valor-inicial="<%= itemF[colunaF.nome] || '' %>" type="hidden" name="filhos[<%= filho.tabela %>][<%= idxF %>][<%= colunaF.nome %>][]" value="<%= itemF[colunaF.nome] || '' %>">
+                  <input data-valor-inicial="<%= itemF[colunaF.nome] || '' %>" type="hidden" name="filhos[<%= filho.entidade.tabela %>][<%= idxF %>][<%= colunaF.nome %>][]" value="<%= itemF[colunaF.nome] || '' %>">
 
                 <% } else { %>
                   <%
@@ -199,7 +199,7 @@
                   <input
                     type="<%= inputTypeF %>"
                     class="w-full p-2 border rounded min-h-[44px] text-sm"
-                    name="filhos[<%= filho.tabela %>][<%= idxF %>][<%= colunaF.nome %>][]"
+                    name="filhos[<%= filho.entidade.tabela %>][<%= idxF %>][<%= colunaF.nome %>][]"
                     value="<%= itemF[colunaF.nome] || '' %>"
                     data-valor-inicial="<%= itemF[colunaF.nome] || '' %>"
                     <%= colunaF.tipo === 'number' ? 'step="any"' : '' %>>
@@ -210,7 +210,7 @@
             <%# Ação de excluir %>
             <div class="md:flex md:justify-center md:py-1">
               <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Excluir</label>
-              <input data-excluir="true" data-valor-inicial="N" type="hidden" name="filhos[<%= filho.tabela %>][<%= idxF %>][excluir][]" value="N">
+              <input data-excluir="true" data-valor-inicial="N" type="hidden" name="filhos[<%= filho.entidade.tabela %>][<%= idxF %>][excluir][]" value="N">
               <input
                 data-remove-item="true"
                 type="checkbox"
@@ -224,7 +224,7 @@
             <button
                     type="button"
                     data-id="adicionar-item"
-                    data-item-container-id="<%= filho.nome %>"
+                    data-item-container-id="<%= filho.entidade.nome %>"
                     class="w-full cursor-pointer sm:w-auto bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 min-h-[44px]"
                     >
                     + Adicionar

@@ -61,15 +61,15 @@ export async function carregar_entidades(pool, entidade_pai, id) {
 
         if(entidade_pai.filhos  && entidade_pai.filhos.length > 0) {
             entidade_pai.filhos.forEach((filho) => {
-                let query_filho = montar_query_entidade(filho).replace(
+                let query_filho = montar_query_entidade(filho.entidade).replace(
                     "WHERE 1=1",
-                    `WHERE 1=1 and ${filho.tabela}.${entidade_pai.tabela}_id = ?`,
+                    `WHERE 1=1 and ${filho.entidade.tabela}.${entidade_pai.tabela}_id = ?`,
                 );
                 promises.push(
                     pool
                     .promise()
                     .query(query_filho, [id])
-                    .then(([rows]) => (itens.filhos[filho.nome] = rows)),
+                    .then(([rows]) => (itens.filhos[filho.entidade.nome] = rows)),
                 );
             });
         }
